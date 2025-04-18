@@ -4,11 +4,11 @@ namespace JovviePayments\Http;
 
 class Response
 {
-	protected mixed $body;
+	protected $body;
 	protected int $statusCode;
 	protected array $headers;
 
-	public function __construct(mixed $body, int $statusCode, array $headers)
+	public function __construct($body, int $statusCode, array $headers)
 	{
 		$this->body = $body;
 		$this->statusCode = $statusCode;
@@ -25,7 +25,7 @@ class Response
 		return $this->headers;
 	}
 
-	public function getBody(): mixed
+	public function getBody()
 	{
 		return $this->body;
 	}

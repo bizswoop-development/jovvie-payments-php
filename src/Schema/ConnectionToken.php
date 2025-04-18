@@ -5,7 +5,7 @@ namespace JovviePayments\Schema;
 class ConnectionToken implements \JsonSerializable
 {
 	public string $secret;
-	public string|null $location;
+	public ?string $location;
 
 	public function __construct($data)
 	{

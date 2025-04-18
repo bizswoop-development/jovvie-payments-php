@@ -6,7 +6,7 @@ use JovviePayments\Schema\Payment\LineItem;
 
 class SubscriptionPaymentLineItem extends LineItem implements \JsonSerializable
 {
-	public string|null $quantity;
+	public ?string $quantity;
 	public string $interval;
 
 	public function __construct($data)

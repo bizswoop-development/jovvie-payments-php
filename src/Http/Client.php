@@ -33,7 +33,7 @@ abstract class Client
 	 * @throws ResponseError If the response status code is not in the 2xx range.
 	 * @throws \Exception For any other errors.
 	 */
-	public function request(array|string $methodOrConfig, ?string $url = null, ?array $params = [], ?array $data = [], ?array $config = []): Response
+	public function request($methodOrConfig, ?string $url = null, ?array $params = [], ?array $data = [], ?array $config = []): Response
 	{
 		$ch = null;
 
@@ -73,7 +73,7 @@ abstract class Client
 			// Add query parameters if provided
 			if (!empty($params)) {
 				$queryString = http_build_query($params);
-				$separator = str_contains($url, '?') ? '&' : '?';
+				$separator = strpos($url, '?') !== false ? '&' : '?';
 				$url .= $separator . $queryString;
 			}
 
@@ -133,7 +133,7 @@ abstract class Client
 		} catch (\Exception $e) {
 			throw new \Exception('Failed to make request: ' . $e->getMessage(), 0, $e);
 		} finally {
-			if ($ch instanceof \CurlHandle) {
+			if (is_resource($ch)) {
 				curl_close($ch);
 			}
 		}
@@ -152,7 +152,7 @@ abstract class Client
 	 * @throws ResponseError If the response status code is not in the 2xx range.
 	 * @throws \Exception For any other errors.
 	 */
-	public function get(array|string $configOrUrl, ?array $params = [], ?array $config = []): Response
+	public function get($configOrUrl, ?array $params = [], ?array $config = []): Response
 	{
 		if (is_array($configOrUrl)) {
 			$configOrUrl['method'] = 'GET';
@@ -176,7 +176,7 @@ abstract class Client
 	 * @throws ResponseError If the response status code is not in the 2xx range.
 	 * @throws \Exception For any other errors.
 	 */
-	public function post(array|string $configOrUrl, ?array $params = [], ?array $data = [], ?array $config = []): Response
+	public function post($configOrUrl, ?array $params = [], ?array $data = [], ?array $config = []): Response
 	{
 		if (is_array($configOrUrl)) {
 			$configOrUrl['method'] = 'POST';
@@ -200,7 +200,7 @@ abstract class Client
 	 * @throws ResponseError If the response status code is not in the 2xx range.
 	 * @throws \Exception For any other errors.
 	 */
-	public function put(array|string $configOrUrl, ?array $params = [], ?array $data = [], ?array $config = []): Response
+	public function put($configOrUrl, ?array $params = [], ?array $data = [], ?array $config = []): Response
 	{
 		if (is_array($configOrUrl)) {
 			$configOrUrl['method'] = 'PUT';
@@ -224,7 +224,7 @@ abstract class Client
 	 * @throws ResponseError If the response status code is not in the 2xx range.
 	 * @throws \Exception For any other errors.
 	 */
-	public function patch(array|string $configOrUrl, ?array $params = [], ?array $data = [], ?array $config = []): Response
+	public function patch($configOrUrl, ?array $params = [], ?array $data = [], ?array $config = []): Response
 	{
 		if (is_array($configOrUrl)) {
 			$configOrUrl['method'] = 'PATCH';
@@ -247,7 +247,7 @@ abstract class Client
 	 * @throws ResponseError If the response status code is not in the 2xx range.
 	 * @throws \Exception For any other errors.
 	 */
-	public function delete(array|string $configOrUrl, ?array $params = [], ?array $config = []): Response
+	public function delete($configOrUrl, ?array $params = [], ?array $config = []): Response
 	{
 		if (is_array($configOrUrl)) {
 			$configOrUrl['method'] = 'DELETE';
@@ -312,7 +312,7 @@ abstract class Client
 	 * @return string The JSON-encoded string.
 	 * @throws \JsonException If encoding fails.
 	 */
-	protected function jsonEncode(mixed $data): string
+	protected function jsonEncode($data): string
 	{
 		return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 	}

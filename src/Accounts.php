@@ -23,7 +23,7 @@ class Accounts
 	 */
 	public function self(): SelfAccount
 	{
-		$response = $this->client->request('get', '/account');
+		$response = $this->client->request('get', 'account');
 
 		$body = $response->getBody();
 

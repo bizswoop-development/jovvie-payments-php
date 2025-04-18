@@ -4,6 +4,7 @@ namespace JovviePayments;
 
 use JovviePayments\Http\Error\ResponseError;
 use JovviePayments\Schema\OneTimePayment\OneTimePayment;
+use JovviePayments\Schema\Payment\Payment;
 use JovviePayments\Schema\SubscriptionPayment\SubscriptionPayment;
 
 class Payments
@@ -43,9 +44,10 @@ class Payments
 			'cancelUrl' => $cancelUrl,
 		]);
 
-		$response = $this->client->request('POST', '/checkout-page/payments', [], $data);
+		$response = $this->client->request('POST', 'checkout-page/payments', [], $data);
 		$data = $response->getBody();
 
+		/* @var OneTimePayment */
 		return $this->prepareReturn($data);
 	}
 
@@ -68,7 +70,7 @@ class Payments
 	 * @throws \Exception
 	 * @throws ResponseError
 	 */
-	public function createSubscriptionsPayment(mixed $customer, array $items, string $currency, string $description, string $returnUrl, string $cancelUrl, ?array $options = []): SubscriptionPayment
+	public function createSubscriptionsPayment($customer, array $items, string $currency, string $description, string $returnUrl, string $cancelUrl, ?array $options = []): SubscriptionPayment
 	{
 		$data = array_merge($options, [
 			'customer' => $customer,
@@ -79,26 +81,28 @@ class Payments
 			'items' => $items,
 		]);
 
-		$response = $this->client->request('POST', '/checkout-page/payments/subscriptions', [], $data);
+		$response = $this->client->request('POST', 'checkout-page/payments/subscriptions', [], $data);
 
 		$data = $response->getBody();
 
+		/* @var SubscriptionPayment */
 		return $this->prepareReturn($data);
 	}
 
 	/**
+	 * @return OneTimePayment|SubscriptionPayment
 	 * @throws ResponseError
 	 * @throws \Exception
 	 */
-	public function get($id): OneTimePayment|SubscriptionPayment
+	public function get($id): Payment
 	{
-		$response = $this->client->request('GET', '/checkout-page/payments/' . $id);
+		$response = $this->client->request('GET', 'checkout-page/payments' . $id);
 		$data = $response->getBody();
 
 		return $this->prepareReturn($data);
 	}
 
-	protected function prepareReturn($data): OneTimePayment|SubscriptionPayment
+	protected function prepareReturn($data): Payment
 	{
 		if ($data->type === 'one-time') {
 			return new OneTimePayment($data);

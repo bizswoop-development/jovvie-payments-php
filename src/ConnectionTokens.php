@@ -23,7 +23,7 @@ class ConnectionTokens
 	 */
 	public function create(): Schema\ConnectionToken
 	{
-		$response = $this->client->request('POST', '/connection-tokens');
+		$response = $this->client->request('POST', 'connection-tokens');
 
 		$body = $response->getBody();
 
