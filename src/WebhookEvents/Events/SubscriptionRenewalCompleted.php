@@ -97,4 +97,18 @@ class SubscriptionRenewalCompleted extends BaseEvent
 		}
 		return $this->payload['invoice']['currency'];
 	}
+
+	/**
+	 * Get the payment status of the invoice.
+	 *
+	 * @return bool True if the invoice is paid, false otherwise
+	 * @throws WebhookError If invoice paid status is missing in the payload
+	 */
+	public function getInvoicePaid()
+	{
+		if (!isset($this->payload['invoice']['paid'])) {
+			throw new WebhookError('Missing invoice.paid in payload');
+		}
+		return (bool)$this->payload['invoice']['paid'];
+	}
 }
