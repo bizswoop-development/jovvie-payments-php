@@ -111,4 +111,18 @@ class SubscriptionRenewalCompleted extends BaseEvent
 		}
 		return (bool)$this->payload['invoice']['paid'];
 	}
+
+	/**
+	 * Get the timestamp when the invoice was created.
+	 *
+	 * @return int Timestamp of invoice creation
+	 * @throws WebhookError If invoice creation timestamp is missing in the payload
+	 */
+	public function getInvoiceCreated()
+	{
+		if (!isset($this->payload['invoice']['created'])) {
+			throw new WebhookError('Missing invoice.created in payload');
+		}
+		return (int)$this->payload['invoice']['created'];
+	}
 }
