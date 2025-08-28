@@ -96,7 +96,7 @@ class Payments
 	 */
 	public function get($id): Payment
 	{
-		$response = $this->client->request('GET', 'checkout-page/payments' . $id);
+		$response = $this->client->request('GET', 'checkout-page/payments/' . $id);
 		$data = $response->getBody();
 
 		return $this->prepareReturn($data);
