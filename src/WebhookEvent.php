@@ -7,6 +7,7 @@ use JovviePayments\WebhookEvents\Events\PaymentCancelled;
 use JovviePayments\WebhookEvents\Events\PaymentCompleted;
 use JovviePayments\WebhookEvents\Events\PaymentFailed;
 use JovviePayments\WebhookEvents\Events\PaymentRefunded;
+use JovviePayments\WebhookEvents\Events\SubscriptionCancelled;
 use JovviePayments\WebhookEvents\Events\SubscriptionRenewalCompleted;
 use JovviePayments\WebhookEvents\Events\SubscriptionRenewalFailed;
 use JovviePayments\WebhookEvents\Events\SubscriptionStatusUpdate;
@@ -26,6 +27,7 @@ class WebhookEvent
 		'jovvie.subscription.renewal.completed' => SubscriptionRenewalCompleted::class,
 		'jovvie.subscription.renewal.failed' => SubscriptionRenewalFailed::class,
 		'jovvie.subscription.status.update' => SubscriptionStatusUpdate::class,
+		'jovvie.subscription.cancelled' => SubscriptionCancelled::class,
 	];
 
 	/**
