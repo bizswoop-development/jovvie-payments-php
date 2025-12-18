@@ -2,6 +2,7 @@
 namespace JovviePayments;
 
 use JovviePayments\Http\Error\ResponseError;
+use JovviePayments\Schema\Account;
 use JovviePayments\Schema\SelfAccount;
 
 class Accounts
@@ -29,4 +30,23 @@ class Accounts
 
 		return new SelfAccount($body);
 	}
+
+    /**
+     * Retrieves all accounts.
+     *
+     * @return Account[] Array of Account objects.
+     *
+     * @throws \Exception
+     * @throws ResponseError
+     */
+    public function getAll(): array
+    {
+        $response = $this->client->request('get', 'accounts');
+
+        $body = $response->getBody();
+
+        return array_map(function($item) {
+            return new Account($item);
+        }, $body);
+    }
 }

@@ -9,7 +9,7 @@ class JovviePaymentsClient extends Client
 {
 	protected array $instanceStorage = [];
 
-	const VERSION = '1.0.0';
+	const VERSION = '1.2.0';
 
 	/**
 	 * Constructor for initializing the payment gateway.
@@ -39,7 +39,7 @@ class JovviePaymentsClient extends Client
 		$this->platformProvider = $platformProvider;
 		$this->mode = $mode;
 		$this->hostUrl = $config['hostUrl'] ?? 'https://payments.bizswoop.app';
-
+		$this->publicAccountId = $config['publicAccountId'] ?? null;
 
 		$this->userAgent = implode(' ', array_filter([
 			$config['userAgent'],
@@ -47,6 +47,11 @@ class JovviePaymentsClient extends Client
 			'JovviePaymentsClient/' . self::VERSION,
 		]));
 	}
+
+    public function setPublicAccountId($publicAccountId): void
+    {
+        $this->publicAccountId = $publicAccountId;
+    }
 
 	protected function getBaseUrl(): string
 	{

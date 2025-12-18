@@ -4,6 +4,8 @@ namespace JovviePayments\Http;
 
 use InvalidArgumentException;
 use JovviePayments\Http\Error\BadRequestError;
+use JovviePayments\Http\Error\ForbiddenError;
+use JovviePayments\Http\Error\NotFoundError;
 use JovviePayments\Http\Error\ResponseError;
 use JovviePayments\Http\Error\UnauthorizedError;
 
@@ -15,6 +17,7 @@ abstract class Client
 	protected string $mode;
 	protected string $hostUrl;
 	protected string $userAgent;
+    protected ?string $publicAccountId = null;
 
 	/**
 	 * Sends an HTTP request using cURL.
@@ -66,9 +69,12 @@ abstract class Client
 				'Platform-Provider: ' . $this->platformProvider,
 			];
 
+            if ($this->publicAccountId !== null) {
+                $baseHeaders[] = 'Public-Account-Id: ' . $this->publicAccountId;
+            }
+
 			$customHeaders = $config['headers'] ?? [];
 			$headers = array_merge($baseHeaders, $customHeaders);
-
 
 			// Add query parameters if provided
 			if (!empty($params)) {
@@ -118,6 +124,10 @@ abstract class Client
 
 			if ($responseHttpCode >= 400) {
 				switch ($responseHttpCode) {
+                    case 404:
+                        throw new NotFoundError($httpResponse, 'Resource not found, url: ' . $url);
+                    case 403:
+                        throw new ForbiddenError($httpResponse, 'Forbidden request, url: ' . $url);
 					case 401:
 						throw new UnauthorizedError($httpResponse, 'Unauthorized request, url: ' . $url);
 					case 400:
