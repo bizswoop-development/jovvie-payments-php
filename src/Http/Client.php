@@ -92,6 +92,13 @@ abstract class Client
 				CURLOPT_USERAGENT => $this->userAgent,
 				CURLOPT_CUSTOMREQUEST => $method,
 				CURLOPT_HEADER => true,
+				// Bound every request so an unreachable / black-holed server fails
+				// fast instead of hanging the PHP request for cURL's ~300s default
+				// (which spins plugin activation and stalls any page that triggers
+				// a call). On timeout curl_exec() returns false and request() raises
+				// the normal Exception path, which callers already handle.
+				CURLOPT_CONNECTTIMEOUT => 5,
+				CURLOPT_TIMEOUT => 15,
 			]);
 
 			if (in_array($method, ['POST', 'PUT', 'PATCH'], true)) {
