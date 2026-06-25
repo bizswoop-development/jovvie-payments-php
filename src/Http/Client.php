@@ -11,6 +11,19 @@ use JovviePayments\Http\Error\UnauthorizedError;
 
 abstract class Client
 {
+	/**
+	 * Request timeouts, in seconds. These intentionally mirror the Stripe PHP
+	 * SDK's published defaults (Stripe\HttpClient\CurlClient::DEFAULT_CONNECT_TIMEOUT
+	 * = 30, ::DEFAULT_TIMEOUT = 80) rather than an arbitrary value: generous
+	 * enough not to cut off a legitimate payment on a slow connection, while
+	 * still bounding the request so an unreachable / black-holed server can never
+	 * hang a PHP worker indefinitely (the original cause of the site-wide outage).
+	 * Applied uniformly to every request, as Stripe does — protecting writes
+	 * against a timeout is the job of idempotency keys, not a shorter timeout.
+	 */
+	protected const CONNECT_TIMEOUT_SECONDS = 30;
+	protected const TIMEOUT_SECONDS = 80;
+
 	protected string $publicKey;
 	protected string $secretKey;
 	protected string $platformProvider;
@@ -92,13 +105,13 @@ abstract class Client
 				CURLOPT_USERAGENT => $this->userAgent,
 				CURLOPT_CUSTOMREQUEST => $method,
 				CURLOPT_HEADER => true,
-				// Bound every request so an unreachable / black-holed server fails
-				// fast instead of hanging the PHP request for cURL's ~300s default
-				// (which spins plugin activation and stalls any page that triggers
-				// a call). On timeout curl_exec() returns false and request() raises
-				// the normal Exception path, which callers already handle.
-				CURLOPT_CONNECTTIMEOUT => 5,
-				CURLOPT_TIMEOUT => 15,
+				// Bound every request (Stripe's published default timeouts) so an
+				// unreachable / black-holed server can't hang the PHP request for
+				// cURL's ~300s default — which spun plugin activation and stalled
+				// any page that triggered a call. On timeout curl_exec() returns
+				// false and request() raises the normal Exception the callers handle.
+				CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT_SECONDS,
+				CURLOPT_TIMEOUT => self::TIMEOUT_SECONDS,
 			]);
 
 			if (in_array($method, ['POST', 'PUT', 'PATCH'], true)) {
