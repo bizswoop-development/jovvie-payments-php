@@ -20,9 +20,33 @@ abstract class Client
 	 * hang a PHP worker indefinitely (the original cause of the site-wide outage).
 	 * Applied uniformly to every request, as Stripe does — protecting writes
 	 * against a timeout is the job of idempotency keys, not a shorter timeout.
+	 *
+	 * Callers may override per request via $config['connectTimeout'] /
+	 * $config['timeout'] (seconds). Overrides can only TIGHTEN the bound: values
+	 * are clamped to [1, default]. Intended for read-only bootstrap lookups that
+	 * sit on an interactive page-load path (e.g. account data resolved during a
+	 * POS settings sync), where blocking a storefront for the payment-grade 80s
+	 * is worse than failing fast to a cached fallback. Leave the defaults in
+	 * place for payment writes.
 	 */
 	protected const CONNECT_TIMEOUT_SECONDS = 30;
 	protected const TIMEOUT_SECONDS = 80;
+
+	/**
+	 * Resolve a timeout for this request: the caller's override clamped to
+	 * [1, default], or the class default. Below 1s clamps up — curl treats 0 as
+	 * "no timeout", the exact hang this exists to prevent. Above the default
+	 * clamps down — a mistaken huge override must not reintroduce the unbounded
+	 * PHP-worker hang the defaults protect against.
+	 */
+	private static function resolveTimeout(?array $config, string $key, int $default): int
+	{
+		if (!isset($config[$key]) || !is_numeric($config[$key])) {
+			return $default;
+		}
+
+		return min($default, max(1, (int) $config[$key]));
+	}
 
 	protected string $publicKey;
 	protected string $secretKey;
@@ -110,8 +134,10 @@ abstract class Client
 				// cURL's ~300s default — which spun plugin activation and stalled
 				// any page that triggered a call. On timeout curl_exec() returns
 				// false and request() raises the normal Exception the callers handle.
-				CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT_SECONDS,
-				CURLOPT_TIMEOUT => self::TIMEOUT_SECONDS,
+				// Read-only bootstrap calls may pass shorter per-request values via
+				// $config (see the timeout docblock above).
+				CURLOPT_CONNECTTIMEOUT => self::resolveTimeout($config, 'connectTimeout', self::CONNECT_TIMEOUT_SECONDS),
+				CURLOPT_TIMEOUT => self::resolveTimeout($config, 'timeout', self::TIMEOUT_SECONDS),
 			]);
 
 			if (in_array($method, ['POST', 'PUT', 'PATCH'], true)) {
