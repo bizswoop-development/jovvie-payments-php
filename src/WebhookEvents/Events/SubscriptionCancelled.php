@@ -43,6 +43,20 @@ class SubscriptionCancelled extends BaseEvent
 	}
 
 	/**
+	 * Get the payment status after the event.
+	 *
+	 * @return string Payment status, e.g. 'completed'
+	 * @throws WebhookError If payment status is missing in the payload
+	 */
+	public function getPaymentStatus(): string
+	{
+		if (!isset($this->payload['payment']['status'])) {
+			throw new WebhookError('Missing payment.status in payload');
+		}
+		return $this->payload['payment']['status'];
+	}
+
+	/**
 	 * Get the unique identifier of the subscription.
 	 *
 	 * @return string Subscription ID

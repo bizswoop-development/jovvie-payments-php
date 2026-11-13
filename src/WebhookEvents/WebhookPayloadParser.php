@@ -45,7 +45,7 @@ class WebhookPayloadParser
 		$version = $parsedData['version'] ?? null;
 
 		$missingFields = [];
-		if (empty($signature)) $missingFields[] = 'id';
+		if (empty($signature)) $missingFields[] = 'signature';
 		if (empty($id)) $missingFields[] = 'id';
 		if (empty($timestamp)) $missingFields[] = 'timestamp';
 		if (empty($version)) $missingFields[] = 'version';
@@ -54,7 +54,13 @@ class WebhookPayloadParser
 			throw new WebhookError('Missing required fields: ' . implode(', ', $missingFields));
 		}
 
-		if ($timestamp < (time() - 300)) {
+		// Timestamp is ISO 8601 (e.g. '2025-01-01T00:00:00.000Z'); Unix seconds are accepted too.
+		$unixTimestamp = is_numeric($timestamp) ? (int)$timestamp : strtotime((string)$timestamp);
+		if ($unixTimestamp === false) {
+			throw new WebhookError('Invalid webhook timestamp: ' . $timestamp);
+		}
+
+		if ($unixTimestamp < (time() - 300)) {
 			throw new WebhookError('Webhook timestamp is too old');
 		}
 

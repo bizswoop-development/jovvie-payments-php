@@ -43,17 +43,17 @@ class SubscriptionRenewalFailed extends BaseEvent
 	}
 
 	/**
-	 * Get the underlying Payment Intent ID associated with this payment.
+	 * Get the payment status after the event.
 	 *
-	 * @return string Payment Intent ID
-	 * @throws WebhookError If payment intent ID is missing in the payload
+	 * @return string Payment status, e.g. 'completed'
+	 * @throws WebhookError If payment status is missing in the payload
 	 */
-	public function getPaymentIntentId(): string
+	public function getPaymentStatus(): string
 	{
-		if (!isset($this->payload['paymentIntent']['id'])) {
-			throw new WebhookError('Missing paymentIntent.id in payload');
+		if (!isset($this->payload['payment']['status'])) {
+			throw new WebhookError('Missing payment.status in payload');
 		}
-		return $this->payload['paymentIntent']['id'];
+		return $this->payload['payment']['status'];
 	}
 
 	/**

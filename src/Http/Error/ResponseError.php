@@ -8,7 +8,7 @@ class ResponseError extends \Exception
 {
 	protected Response $response;
 
-	public function __construct(Response $response, $message, $code = 0, \Exception $previous = null)
+	public function __construct(Response $response, $message, $code = 0, ?\Exception $previous = null)
 	{
 		$this->response = $response;
 		if ($code === 0) {

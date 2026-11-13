@@ -162,7 +162,14 @@ abstract class Client
 				throw new \Exception('cURL Error (' . curl_errno($ch) . '): ' . curl_error($ch));
 			}
 
-			if (strpos($responseHeaders['Content-Type'], 'application/json') >= 0) {
+			$contentType = '';
+			foreach ($responseHeaders as $name => $value) {
+				if (strcasecmp($name, 'Content-Type') === 0) {
+					$contentType = $value;
+				}
+			}
+
+			if (stripos($contentType, 'application/json') !== false) {
 				$responseBody = json_decode($responseBody);
 			}
 

@@ -5,7 +5,8 @@ namespace JovviePayments\WebhookEvents\Events;
 use JovviePayments\WebhookEvents\Error\WebhookError;
 
 /**
- * Class for subscription status update webhook events
+ * Class for subscription status update webhook events.
+ * The new status is returned by getPaymentStatus().
  */
 class SubscriptionStatusUpdate extends BaseEvent
 {
@@ -43,6 +44,20 @@ class SubscriptionStatusUpdate extends BaseEvent
 	}
 
 	/**
+	 * Get the payment status after the event.
+	 *
+	 * @return string Payment status, e.g. 'completed'
+	 * @throws WebhookError If payment status is missing in the payload
+	 */
+	public function getPaymentStatus(): string
+	{
+		if (!isset($this->payload['payment']['status'])) {
+			throw new WebhookError('Missing payment.status in payload');
+		}
+		return $this->payload['payment']['status'];
+	}
+
+	/**
 	 * Get the unique identifier of the subscription.
 	 *
 	 * @return string Subscription ID
@@ -61,6 +76,7 @@ class SubscriptionStatusUpdate extends BaseEvent
 	 *
 	 * @return string Subscription status
 	 * @throws WebhookError If subscription status is missing in the payload
+     * @deprecated
 	 */
 	public function getSubscriptionStatus(): string
 	{

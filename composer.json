@@ -1,16 +1,16 @@
 {
-	"name": "bizswoop/jovvie-payments",
-	"description": "PHP SDK for Jovvie Payments API",
-	"minimum-stability": "stable",
+  "name": "bizswoop/jovvie-payments",
+  "description": "PHP SDK for Jovvie Payments API",
+  "minimum-stability": "stable",
   "license": "MIT",
-	"require": {
-		"php": ">=7.4.0",
-		"ext-curl": "*",
-		"ext-json": "*"
-	},
-	"autoload": {
-		"psr-4": {
-			"JovviePayments\\": "src/"
-		}
-	}
+  "require": {
+    "php": ">=7.4.0",
+    "ext-curl": "*",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "JovviePayments\\": "src/"
+    }
+  }
 }

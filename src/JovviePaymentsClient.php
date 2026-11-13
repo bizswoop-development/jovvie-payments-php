@@ -9,7 +9,7 @@ class JovviePaymentsClient extends Client
 {
 	protected array $instanceStorage = [];
 
-	const VERSION = '1.2.0';
+	const VERSION = '1.3.0';
 
 	/**
 	 * Constructor for initializing the payment gateway.
@@ -24,7 +24,7 @@ class JovviePaymentsClient extends Client
 	 *
 	 * @throws InvalidArgumentException If an invalid mode is provided.
 	 */
-	public function __construct(string $publicKey, string $secretKey, string $platformProvider, string $mode = 'live', array $config = null)
+	public function __construct(string $publicKey, string $secretKey, string $platformProvider, string $mode = 'live', ?array $config = null)
 	{
 		if (!in_array($mode, ['live', 'test'], true)) {
 			throw new InvalidArgumentException("Invalid mode: {$mode}. Allowed values are 'live' or 'test'.");
@@ -42,7 +42,7 @@ class JovviePaymentsClient extends Client
 		$this->publicAccountId = $config['publicAccountId'] ?? null;
 
 		$this->userAgent = implode(' ', array_filter([
-			$config['userAgent'],
+			$config['userAgent'] ?? null,
 			'PHP/' . PHP_VERSION,
 			'JovviePaymentsClient/' . self::VERSION,
 		]));

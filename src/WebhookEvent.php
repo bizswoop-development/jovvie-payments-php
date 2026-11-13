@@ -2,15 +2,19 @@
 
 namespace JovviePayments;
 
+use JovviePayments\WebhookEvents\Error\UnknownEventError;
 use JovviePayments\WebhookEvents\Error\WebhookError;
+use JovviePayments\WebhookEvents\Events\PaymentAbandoned;
 use JovviePayments\WebhookEvents\Events\PaymentCancelled;
 use JovviePayments\WebhookEvents\Events\PaymentCompleted;
 use JovviePayments\WebhookEvents\Events\PaymentFailed;
 use JovviePayments\WebhookEvents\Events\PaymentRefunded;
+use JovviePayments\WebhookEvents\Events\SubscriptionAbandoned;
 use JovviePayments\WebhookEvents\Events\SubscriptionCancelled;
 use JovviePayments\WebhookEvents\Events\SubscriptionRenewalCompleted;
 use JovviePayments\WebhookEvents\Events\SubscriptionRenewalFailed;
 use JovviePayments\WebhookEvents\Events\SubscriptionStatusUpdate;
+use JovviePayments\WebhookEvents\Events\UnknownEvent;
 use JovviePayments\WebhookEvents\Events\BaseEvent;
 use JovviePayments\WebhookEvents\WebhookPayloadParser;
 
@@ -20,6 +24,7 @@ use JovviePayments\WebhookEvents\WebhookPayloadParser;
 class WebhookEvent
 {
 	private const EVENT_MAP = [
+		'jovvie.payment.abandoned' => PaymentAbandoned::class,
 		'jovvie.payment.cancelled' => PaymentCancelled::class,
 		'jovvie.payment.completed' => PaymentCompleted::class,
 		'jovvie.payment.failed' => PaymentFailed::class,
@@ -28,6 +33,7 @@ class WebhookEvent
 		'jovvie.subscription.renewal.failed' => SubscriptionRenewalFailed::class,
 		'jovvie.subscription.status.update' => SubscriptionStatusUpdate::class,
 		'jovvie.subscription.cancelled' => SubscriptionCancelled::class,
+		'jovvie.subscription.abandoned' => SubscriptionAbandoned::class,
 	];
 
 	/**
@@ -36,27 +42,31 @@ class WebhookEvent
 	 * @param string $data The raw JSON data from the webhook request
 	 * @param string $signature The request signature from the headers
 	 * @param string $webhookKey The secret key for signature validation
+	 * @param bool $throwUnknownEvents Throw UnknownEventError for unknown event types; false returns an UnknownEvent instead
 	 *
 	 * @return BaseEvent The webhook event instance
 	 *
+	 * @throws UnknownEventError If the event type is unknown and $throwUnknownEvents is true
 	 * @throws WebhookError
 	 */
-	public static function constructEvent(string $data, string $signature, string $webhookKey): BaseEvent
+	public static function constructEvent(string $data, string $signature, string $webhookKey, bool $throwUnknownEvents = true): BaseEvent
 	{
 		$parsedData = WebhookPayloadParser::validateRequestSignature($data, $signature, $webhookKey);
 
-		return self::constructFrom($parsedData);
+		return self::constructFrom($parsedData, $throwUnknownEvents);
 	}
 
 	/**
 	 * Create an event instance based on the event type
 	 *
 	 * @param string|array $data The raw JSON data from the webhook request
+	 * @param bool $throwUnknownEvents Throw UnknownEventError for unknown event types; false returns an UnknownEvent instead
 	 *
 	 * @return BaseEvent The webhook event instance
+	 * @throws UnknownEventError If the event type is unknown and $throwUnknownEvents is true
 	 * @throws WebhookError
 	 */
-	public static function constructFrom($data): BaseEvent
+	public static function constructFrom($data, bool $throwUnknownEvents = true): BaseEvent
 	{
 		if (is_string($data)) {
 			$data = WebhookPayloadParser::parseJson($data);
@@ -86,8 +96,12 @@ class WebhookEvent
 
 		if ($class) {
 			return new $class($payload, $id);
-		} else {
-			throw new WebhookError('Unsupported event type: ' . $type);
 		}
+
+		$event = new UnknownEvent($payload, $id, $type);
+		if (!$throwUnknownEvents) {
+			return $event;
+		}
+		throw new UnknownEventError($event);
 	}
 }

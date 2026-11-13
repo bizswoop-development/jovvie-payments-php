@@ -30,7 +30,7 @@ class AuthorizationLinks
 	 * @throws \Exception If an unexpected error occurs.
 	 * @throws ResponseError If the API request fails.
 	 */
-	public function create(array $options, string $expiresAt = null): AuthorizationLink
+	public function create(array $options, ?string $expiresAt = null): AuthorizationLink
 	{
 		$data = [
 			'options' => $options,
